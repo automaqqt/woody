@@ -478,10 +478,9 @@
     {
         "id": 46,
         "start": "4r1k1/6qp/pp4p1/2pP4/4Pp2/1P6/P1R3PP/4Q2K b - - 0 1",
-        "end": "6k1/6qp/pp4p1/2pP4/4rp2/1P6/P1R3PP/5Q1K b - - 1 2",
+        "end": "6k1/6qp/pp4p1/2pP4/4rp2/1P6/P1R3PP/4Q2K w - - 0 2",
         "moves": [
-            "e8e4",
-            "e1f1"
+            "e8e4"
         ]
     },
     {

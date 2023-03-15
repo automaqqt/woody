@@ -157,7 +157,7 @@ function ChessgroundWoody({
       }
       else {
         setModal(true);
-        cg.move(dest, orig);
+        cg.set({fen:chess.fen()})
         setCG(cg,chess,true);
       }
       
