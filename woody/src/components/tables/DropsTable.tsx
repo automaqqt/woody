@@ -24,7 +24,7 @@ export default function DropsTable() {
   console.log(drops)
   let dropsToIter = drops;
   if (drops) {
-    drops?.sort((a, b) => b.score - a.score);
+    drops?.sort((a, b) => sortF(a,b));
     if (drops?.length > 100) {
       
       dropsToIter = drops.slice(0,100);
@@ -33,6 +33,23 @@ export default function DropsTable() {
       dropsToIter = drops;
     }
   }
+
+  function sortF(ob1: Score,ob2: Score) {
+    if (ob1.score < ob2.score) {
+        return 1;
+    } else if (ob1.score > ob2.score) { 
+        return -1;
+    }
+
+    // Else go to the 2nd item
+    if (ob1.time_passed_in_ms < ob2.time_passed_in_ms) { 
+        return -1;
+    } else if (ob1.time_passed_in_ms > ob2.time_passed_in_ms) {
+        return 1
+    } else { // nothing to split them
+        return 0;
+    }
+}
   
   
 

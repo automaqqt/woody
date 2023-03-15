@@ -22,10 +22,6 @@ import { Course } from '@/interfaces/training';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import SuccessDialog from './modals/SuccessModal';
-import Particles from 'react-tsparticles'
-import type { Container, Engine } from "tsparticles-engine";
-import { loadFull } from "tsparticles";
-import { loadConfettiPreset } from 'tsparticles-preset-confetti';
 import Confetti from './misc/confetti';
 
 interface Props {
@@ -45,12 +41,14 @@ function ChessgroundWoody({
   const [win, setWin] = useState(false);
   const [winReal, setWinReal] = useState(false);
   const [confetti, setConfetti] = useState(false);
-  let currentLegal = 0;
+  let currentLegal= 0;
   const [currentLegalMoves, setCurrentLegalMoves] = useState(courses[score.score].moves);
 
   const ref = useRef<HTMLDivElement>(null);
   const chess = new Chess();
-  config = { ... config, movable: {
+  config = { ... config, 
+    turnColor: (courses[score.score].start.split(' ')[1] === 'w') ? 'white' : 'black',
+    movable: {
     color: 'white',
     free: false,
     dests: toDests(chess)
@@ -59,6 +57,7 @@ function ChessgroundWoody({
     check: true
   }}
   useEffect(() => {
+    
     if (ref && ref.current && !api) {
       const chessgroundApi = ChessgroundApi(ref.current, {
         animation: { enabled: true, duration: 500 },
@@ -78,17 +77,18 @@ function ChessgroundWoody({
           color: toColor(chess),
           dests: toDests(chess),
           events: {
-            after: trainPlay(api, chess, 500, false)
+            after: trainPlay(api, chess, 1000, false)
           }
         }
       })
+
     const interval = setInterval(() => {
       const newTime = dateToTimer(score)
       setTimer(newTime);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [api, config]);
+  }, [api, score, currentLegalMoves]);
 
   async function updateScore() {
     let newScore = score;
@@ -109,12 +109,22 @@ function ChessgroundWoody({
         return setWinReal(true)
       }
 
-      if (score.score % 3 === 0) {
-        setConfetti(true);
-      }
+      
+
+      console.log(orig+dest,currentLegal, currentLegalMoves[currentLegal])
 
       if (orig+dest === currentLegalMoves[currentLegal]) {
+
+        
+
         if (currentLegal+1 >= currentLegalMoves.length) {
+          if (score.score % 1 === 0 && score.score != 0) {
+            setConfetti(true);
+            setTimeout(() => {
+              setConfetti(false)
+              
+            }, 400);
+          }          
           updateScoreAndNextCourse(cg,chess);
         }
         else {
@@ -126,24 +136,27 @@ function ChessgroundWoody({
             chess.move({from:nextFrom, to:nextTo})
             //@ts-ignore
             cg.move(nextFrom, nextTo);
-            setCG(cg,chess,true);
+
             
+            setCG(cg,chess,true);
             currentLegal = currentLegal+2;
+            
           }, delay);
+          
           }
       }
       else {
         setModal(true);
+        cg.move(dest, orig);
         setCG(cg,chess,true);
       }
       
     };
   }
-
   async function updateScoreAndNextCourse(cg: Api, chess: Chess) {
     await updateScore();
     setCurrentLegalMoves(courses[score.score].moves);
-    currentLegal = 0;
+    currentLegal=0;
     chess.load(courses[score.score].start);
     cg.set({
       fen: courses[score.score].start,
@@ -153,15 +166,10 @@ function ChessgroundWoody({
         dests: toDests(chess)
       },
       highlight: {
-        lastMove: true,
+        lastMove: false,
         check: true
       }
-    })
-    setTimeout(() => {
-      //@ts-ignore
-      setConfetti(false)
-    }, 1500);
-    
+    })    
   }
 
   function setCG(cg: Api, chess: Chess, highlight: boolean = true) {
@@ -177,25 +185,6 @@ function ChessgroundWoody({
       }
     });
   }
-/* 
-  function showConfetti() {
-    // Konfetti-Optionen
-    const confettiOptions = {
-      angle: 90,
-      spread: 45,
-      startVelocity: 40,
-      elementCount: 100,
-      dragFriction: 0.12,
-      duration: 3000,
-      stagger: 3,
-      width: "10px",
-      height: "10px",
-      colors: ["#F44336", "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3", "#03A9F4", "#00BCD4", "#009688", "#4CAF50", "#8BC34A", "#CDDC39", "#FFC107", "#FF9800", "#FF5722", "#795548", "#607D8B"]
-    };
-    
-    // Konfetti-Animation starten
-    confetti(confettiOptions);
-  } */
 
   function dateToTimer(score:Score): string {
     const date = calcRestTime(score);
@@ -233,7 +222,7 @@ function ChessgroundWoody({
       />
       <Typography
             variant="h6"
-            sx={{ textAlign: 'center', justifyItems:'center', marginTop: -8, marginLeft: 14,marginBottom: 5 }}
+            sx={{ textAlign: 'center', justifyItems:'center', float:'right', marginTop: -8, marginLeft: 14,marginBottom: 5 }}
           >
             <TaskAltIcon/> {`${score.score} / ${courses.length}`}
 
@@ -244,6 +233,7 @@ function ChessgroundWoody({
       <div style={{ height: width, width: width }}>
         <div ref={ref} style={{ height: '100%', width: '100%', display: 'table' }} />
       </div>
+      Am Zug: {toGermanColor(api?.state.turnColor)}
     </>
     
   );
