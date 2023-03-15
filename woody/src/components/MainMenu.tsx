@@ -4,7 +4,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { Fab, Box, Container, Typography, Button, CssBaseline, FormControl, ToggleButton, styled, ToggleButtonGroup } from '@mui/material';
 import { useRouter } from 'next/router';
 import GreenButton from './button/GenericButton';
-import BackButton from './button/BackButton';
+import TopSmallActionButton from './button/TopButton';
 import { useStore } from '../utils/store';
 import { useState } from 'react';
 
@@ -93,7 +93,7 @@ export default function MainMenu() {
   if (choosing === 'No') {
     return (
       <>
-      <BackButton {...{
+      <TopSmallActionButton {...{
         onClick:logout,
         buttonText:'Abmelden',
         color:'#FF0000'

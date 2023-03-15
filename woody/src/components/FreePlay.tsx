@@ -13,7 +13,7 @@ import { fetchWrapper } from '../utils/fetch-wrapper';
 import "chessground/assets/chessground.base.css";
 import "chessground/assets/chessground.brown.css";
 import "chessground/assets/chessground.cburnett.css";
-import { Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 import { defaultBoard } from '../interfaces/constants';
 import { Score } from '@/interfaces/user';
 import { Key } from 'chessground/types';
@@ -23,6 +23,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import SuccessDialog from './modals/SuccessModal';
 import Confetti from './misc/confetti';
+import TopSmallActionButton from './button/TopButton';
 
 interface Props {
   width?: number
@@ -41,13 +42,14 @@ function ChessgroundWoody({
   const [win, setWin] = useState(false);
   const [winReal, setWinReal] = useState(false);
   const [confetti, setConfetti] = useState(false);
+  const [skip, setSkip] = useState(0);
   let currentLegal= 0;
-  const [currentLegalMoves, setCurrentLegalMoves] = useState(courses[score.score].moves);
+  const [currentLegalMoves, setCurrentLegalMoves] = useState(courses[score.score+skip].moves);
 
   const ref = useRef<HTMLDivElement>(null);
   const chess = new Chess();
   config = { ... config, 
-    turnColor: (courses[score.score].start.split(' ')[1] === 'w') ? 'white' : 'black',
+    turnColor: (courses[score.score+skip].start.split(' ')[1] === 'w') ? 'white' : 'black',
     movable: {
     color: 'white',
     free: false,
@@ -56,6 +58,9 @@ function ChessgroundWoody({
   highlight: {
     check: true
   }}
+  const skipCourse = () => {
+    setSkip(skip+1);
+  };
   useEffect(() => {
     
     if (ref && ref.current && !api) {
@@ -70,9 +75,14 @@ function ChessgroundWoody({
   }, [ref]);
 
   useEffect(() => {
-    chess.load(courses[score.score].start)
+    setCurrentLegalMoves(courses[score.score+skip].moves);
+    
+  }, [skip]);
+
+  useEffect(() => {
+    chess.load(courses[score.score+skip].start)
     api?.set({
-      fen: courses[score.score].start, ...config,
+      fen: courses[score.score+skip].start, ...config,
         movable: {
           color: toColor(chess),
           dests: toDests(chess),
@@ -88,7 +98,7 @@ function ChessgroundWoody({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [api, score, currentLegalMoves]);
+  }, [api, score, currentLegalMoves, skip]);
 
   async function updateScore() {
     let newScore = score;
@@ -155,11 +165,11 @@ function ChessgroundWoody({
   }
   async function updateScoreAndNextCourse(cg: Api, chess: Chess) {
     await updateScore();
-    setCurrentLegalMoves(courses[score.score].moves);
+    setCurrentLegalMoves(courses[score.score+skip].moves);
     currentLegal=0;
-    chess.load(courses[score.score].start);
+    chess.load(courses[score.score+skip].start);
     cg.set({
-      fen: courses[score.score].start,
+      fen: courses[score.score+skip].start,
       turnColor: toColor(chess),
       movable: {
         color: toColor(chess),
@@ -220,14 +230,24 @@ function ChessgroundWoody({
         setOpen={setWinReal}
         text={'Du hast alle Aufgaben gelöst!'}
       />
+      <Button
+      variant="contained"
+      aria-label={'hi'}
+      sx={{ float:'right', marginTop:-9, backgroundColor: '#FF0000' }}
+      onClick={skipCourse}
+    >
+      {'Überspringen >'}
+    </Button>
       <Typography
             variant="h6"
-            sx={{ textAlign: 'center', justifyItems:'center', float:'right', marginTop: -8, marginLeft: 14,marginBottom: 5 }}
+            sx={{ textAlign: 'center', justifyItems:'center', marginBottom:1 }}
           >
             <TaskAltIcon/> {`${score.score} / ${courses.length}`}
 
             <AccessTimeIcon sx={{marginLeft:5, marginTop:1}}/> {timer}
+            
       </Typography>
+      
       <Confetti {...{fire:confetti}}/>
 
       <div style={{ height: width, width: width }}>

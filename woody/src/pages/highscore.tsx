@@ -2,7 +2,7 @@ import { Container, Box, Button, CircularProgress } from '@mui/material';
 import { useWindowSize } from '../utils/helper';
 import { useStore } from '../utils/store';
 import { useRouter } from 'next/router';
-import BackButton from '../components/button/BackButton';
+import TopSmallActionButton from '../components/button/TopButton';
 import { fetchWrapper } from '../utils/fetch-wrapper';
 import ChessgroundWoody from '../components/FreePlay';
 import { Score } from '@/interfaces/user';
@@ -17,7 +17,7 @@ function HighScore() {
   
     return (
       <>
-        <BackButton {...{
+        <TopSmallActionButton {...{
         onClick:() => router.back(),
         buttonText:'< Zurück'
         }}/>
